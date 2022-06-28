@@ -5,7 +5,6 @@
 package it.polito.tdp.yelp;
 
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.ResourceBundle;
 
@@ -78,7 +77,19 @@ public class FXMLController {
 
     @FXML
     void doTrovaMiglioramento(ActionEvent event) {
+    	txtResult.clear();
+    	List<Review> lista = model.trovaMiglioramento();
+    	if(lista==null) {
+    		txtResult.setText("Devi prima creare il grafo");
+    		return;
+    	}
     	
+    	txtResult.appendText("RISULTATO:\n\n");
+    	for(Review r : lista) {
+    		txtResult.appendText(r+"\n");
+    	}
+    	
+    	txtResult.appendText("\nNUMERO DI GIORNI TOTALE: "+model.getNumGiorni());
     }
 
     @FXML // This method is called by the FXMLLoader when initialization is complete

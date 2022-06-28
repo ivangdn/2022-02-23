@@ -17,6 +17,9 @@ public class Model {
 	private List<String> cities;
 	private Graph<Review, DefaultWeightedEdge> grafo;
 	
+	private List<Review> best;
+	private int numGiorni;
+	
 	public Model() {
 		this.dao = new YelpDao();
 	}
@@ -72,6 +75,44 @@ public class Model {
 			}
 		}
 		return reviewsMaxArchi;
+	}
+	
+	public List<Review> trovaMiglioramento() {
+		if(this.grafo==null)
+			return null;
+		
+		this.best = new ArrayList<>();
+		this.numGiorni = 0;
+		List<Review> parziale = new ArrayList<>();
+		for(Review r : grafo.vertexSet()) {
+			parziale.add(r);
+			cerca(parziale, 0);
+			parziale.clear();
+		}
+		
+		return this.best;
+	}
+
+	private void cerca(List<Review> parziale, int numGiorniParziale) {
+		if(parziale.size() > best.size()) {
+			this.best = new ArrayList<>(parziale);
+			this.numGiorni = numGiorniParziale;
+		}
+		
+		for(DefaultWeightedEdge e : grafo.outgoingEdgesOf(parziale.get(parziale.size()-1))) {
+			Review vicina = Graphs.getOppositeVertex(grafo, e, parziale.get(parziale.size()-1));
+			if(!parziale.contains(vicina) && vicina.getStars() >= parziale.get(parziale.size()-1).getStars()) {
+				parziale.add(vicina);
+				numGiorniParziale += grafo.getEdgeWeight(e);
+				cerca(parziale, numGiorniParziale);
+				parziale.remove(parziale.size()-1);
+				numGiorniParziale -= grafo.getEdgeWeight(e);
+			}
+		}
+	}
+	
+	public int getNumGiorni() {
+		return this.numGiorni;
 	}
 	
 }
